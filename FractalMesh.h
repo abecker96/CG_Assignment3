@@ -36,25 +36,25 @@ class FractalMesh {
             glBindVertexArray(VertexArrayID);
 
             // Load and compile shaders
-            facesProgram = LoadShaders("facesShader.vrt.glsl", "facesShader.frg.glsl");
+            fractalShader = LoadShaders("fractalShader.vrt.glsl", "fractalShader.frg.glsl");
 
             //initialize MVP transformation matrix
-            MVPMatrix_faces = glGetUniformLocation(facesProgram, "MVP" );
+            MVPMatrix_faces = glGetUniformLocation(fractalShader, "MVP" );
             if (MVPMatrix_faces < 0)
             {   std::cerr<< "couldn't find MVP matrix in faces shader\n";   }
 
             //initialize wireframe color in shaders
-            wireframeColorRef = glGetUniformLocation(facesProgram, "wireframeColor");
+            wireframeColorRef = glGetUniformLocation(fractalShader, "wireframeColor");
             if(wireframeColorRef < 0)
             {   std::cerr<< "couldn't find wireframeColor in shader\n"; }
 
             //initialize timer in rainbow shaders
-            timerRef = glGetUniformLocation(facesProgram, "colorTimer");
+            timerRef = glGetUniformLocation(fractalShader, "colorTimer");
             if(timerRef < 0)
             {   std::cerr<< "couldn't find colorTimer in shader\n";   }
 
             //initialize rainbow boolean in faces shaders
-            colorTypeRef = glGetUniformLocation(facesProgram, "colorType");
+            colorTypeRef = glGetUniformLocation(fractalShader, "colorType");
             if(colorTypeRef < 0)
             {   std::cerr<< "couldn't find colorType in shader\n";   }
 
@@ -84,7 +84,7 @@ class FractalMesh {
         void draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
         {
             // use shaders for the fractal
-            glUseProgram(facesProgram);
+            glUseProgram(fractalShader);
 
             // Activating attribute buffers and sending updated data to the GPU
             // 1st attribute buffer : vertex positions
@@ -179,7 +179,7 @@ class FractalMesh {
         }
     private:
         glm::mat4 objectToWorldMatrix, translationMatrix, scalingMatrix, rotationMatrix;
-        GLuint facesProgram, VertexArrayID;
+        GLuint fractalShader, VertexArrayID;
         GLuint vertexbuffer, colorbuffer;
         GLint MVPMatrix_faces, MVPMatrix_wireframe, wireframeColorRef, timerRef, colorTypeRef;
         GLFWwindow* window;
