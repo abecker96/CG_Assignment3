@@ -13,7 +13,7 @@ out vec3 vPosition_out;
 
 void main() {
     //link vertexPos with gl_Position
-    gl_Position = vec4(vPosition_Modelspace, 1.0);
+    gl_Position = MVP * vec4(vPosition_Modelspace, 1.0);
 
     //forward color data on to fragment shader
     fragmentColor = vertexColor;

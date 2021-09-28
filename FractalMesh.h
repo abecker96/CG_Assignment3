@@ -25,11 +25,12 @@
 class FractalMesh {
     public:
         FractalMesh(){}
-        void init(GLFWwindow* window, glm::mat4 translation, glm::mat4 scale, int colorStyle)
+        void init(GLFWwindow* window, glm::mat4 translation, glm::mat4 scale, glm::mat4 rotation, int colorStyle, bool randomColors)
         {
             renderFaces = true;
             renderWireframe = true;
             colorType = colorStyle;
+            variableColors = randomColors;
 
             glGenVertexArrays(1, &VertexArrayID);
             glBindVertexArray(VertexArrayID);
@@ -75,8 +76,8 @@ class FractalMesh {
             // Set up modelMatrix as identity matrix for now
             translationMatrix = translation;
             scalingMatrix = scale;
-            rotationMatrix = glm::mat4(1);
-            objectToWorldMatrix = translationMatrix, rotationMatrix, scalingMatrix;
+            rotationMatrix = rotation;
+            objectToWorldMatrix = translationMatrix * rotationMatrix * scalingMatrix;
         }
         // draw function
         // Draws every triangle in the vertexbuffer with a color corresponding to the colorbuffer
@@ -111,6 +112,7 @@ class FractalMesh {
             );
 
             // Render relative to the camera
+            updateObjectToWorld();
             glm::mat4 MVP = projectionMatrix * viewMatrix * objectToWorldMatrix;
             glUniformMatrix4fv(MVPMatrix_faces, 1, GL_FALSE, glm::value_ptr(MVP));
 
@@ -146,10 +148,10 @@ class FractalMesh {
             setVertData();
             setColorData();
         }
-        void reset()
+        void reset(int seed)
         {
             // Re-initialize random number generator
-            seed = (int)(glfwGetTime()*10);
+            seed = (int)(glfwGetTime()*1000)+seed;
             srand(seed);
             // Output seed to console for potential replication
             std::cout << "Seed: " << seed << std::endl;
@@ -177,14 +179,14 @@ class FractalMesh {
         }
     private:
         glm::mat4 objectToWorldMatrix, translationMatrix, scalingMatrix, rotationMatrix;
-        GLuint facesProgram, /*wireframeProgram,*/ VertexArrayID;
+        GLuint facesProgram, VertexArrayID;
         GLuint vertexbuffer, colorbuffer;
         GLint MVPMatrix_faces, MVPMatrix_wireframe, wireframeColorRef, timerRef, colorTypeRef;
         GLFWwindow* window;
         glm::vec3 wireframeColor = glm::vec3(1.0, 1.0, 1.0);    //Color for the wireframe
         std::vector<Vector3> fractalVertVec;
         int seed, colorSelector, colorType;
-        bool renderFaces, renderWireframe;
+        bool renderFaces, renderWireframe, variableColors;
         float roughness = 0.4;                //How quickly displacement decreases
         float startDisplacement = 1.2;        //affects initial displacement from starting vertex
         float displacement = startDisplacement;     //changes every iteration
@@ -206,30 +208,14 @@ class FractalMesh {
             0.8000, 0.8000, 0.8000,
             -0.200, 0.8000, 0.8000
         };
-
+        void updateObjectToWorld()
+        {
+            objectToWorldMatrix = translationMatrix * rotationMatrix * scalingMatrix;
+        }
         void renderAsWireframe(glm::mat4 MVP)
         {
             // Send colorType for wireframe
             glUniform1i(colorTypeRef, 0);
-            // // 1st attribute buffer : vertex positions
-            // // I'm not convinced this need to happen every frame
-            // // But it works for now
-            // glEnableVertexAttribArray(0);
-            // glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-            // glVertexAttribPointer(
-            //     0,                  //matches layout in vertex shader
-            //     3,                  //3 vertices
-            //     GL_FLOAT,           //type
-            //     GL_FALSE,           //normalized?
-            //     0,                  //stride
-            //     (void*)0            //array buffer offset
-            // );
-
-            // // Set wireframe color
-            // glUniform3fv(wireframeColorRef, 1, glm::value_ptr(wireframeColor));
-
-            // // Render relative to the camera
-            // glUniformMatrix4fv(MVPMatrix_wireframe, 1, GL_FALSE, glm::value_ptr(MVP));
 
             glEnable(GL_POLYGON_OFFSET_LINE);
             glPolygonOffset(0.01, -1);
@@ -248,10 +234,6 @@ class FractalMesh {
         {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             glDrawArrays(GL_TRIANGLES, 0, fractalVertVec.size()); //draw 3 vertices as a triangle
-
-            //disable arrays to move on to other things
-            //glDisableVertexAttribArray(0);  
-            //glDisableVertexAttribArray(1);
         }
         // fractalizeTriangle function
         // Takes a <point3d> vector, starting index, and a displacement scalar as input
@@ -317,6 +299,11 @@ class FractalMesh {
         {
             float colorScale = (p.y+1)/2;
             float random = randomBetween(0, 1);
+            if(!variableColors)
+            {   
+                random = 1; 
+                colorScale = 1;
+            }
             float g = colorPalette[1] + random*colorScale*colorPalette[7];
             float b = colorPalette[2] + random*colorScale*colorPalette[8];
             float r = colorPalette[0] + random*colorScale*colorPalette[6];
@@ -433,7 +420,7 @@ class FractalMesh {
         // Generates a random triangle between global -initialSize and +initialSize
         std::vector<Vector3> genTriangle()
         {
-            seed = (int)(glfwGetTime()*1000);
+            seed = (int)(glfwGetTime()*10000);
             std::vector<Vector3> newTriangle = {
                 Vector3(randomBetween(-1, 1), randomBetween(-1, 1), randomBetween(-1, 1)),
                 Vector3(randomBetween(-1, 1), randomBetween(-1, 1), randomBetween(-1, 1)),

@@ -11,7 +11,12 @@
 #include "glCamera.h"
 
 
-FractalMesh fractalMesh = FractalMesh();
+const int meshRows = 2;
+const int meshCols = 2;
+const int meshDepth = 2;
+
+FractalMesh fractalMeshA;
+FractalMesh fractalMeshes[meshRows][meshCols][meshDepth];
 Camera camera = Camera();
 
 // https://stackoverflow.com/questions/5289613/generate-random-float-between-two-floats/5289624
@@ -36,11 +41,31 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
-        fractalMesh.fractalize();
+        for(int i = 0; i < meshRows; i++)
+        {
+            for(int j = 0; j < meshCols; j++)
+            {
+                for(int k = 0; k < meshDepth; k++)
+                {
+                    fractalMeshes[i][j][k].fractalize();
+                }
+            }
+        }
+        //fractalMeshA.fractalize();
     }
     else if(button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
     {
-        fractalMesh.reset();
+        for(int i = 0; i < meshRows; i++)
+        {
+            for(int j = 0; j < meshCols; j++)
+            {
+                for(int k = 0; k < meshDepth; k++)
+                {
+                    fractalMeshes[i][j][k].reset(i+j*10+k*100);
+                }
+            }
+        }
+        //fractalMeshA.reset(i+j+k);
     }
 
 }
@@ -52,27 +77,87 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     {
         switch(key){
             case GLFW_KEY_1:        // 1-4 change colors
-                fractalMesh.setColor(0);
+                for(int i = 0; i < meshRows; i++)
+                {
+                    for(int j = 0; j < meshCols; j++)
+                    {
+                        for(int k = 0; k < meshDepth; k++)
+                        {
+                            fractalMeshes[i][j][k].setColor(0);
+                        }
+                    }
+                }
+                //fractalMeshA.setColor(0);
                 // colorSelector = 0;
                 break;
             case GLFW_KEY_2:
-                fractalMesh.setColor(1);
+                for(int i = 0; i < meshRows; i++)
+                {
+                    for(int j = 0; j < meshCols; j++)
+                    {
+                        for(int k = 0; k < meshDepth; k++)
+                        {
+                            fractalMeshes[i][j][k].setColor(1);
+                        }
+                    }
+                }
+                //fractalMeshA.setColor(1);
                 // colorSelector = 1;
                 break;
             case GLFW_KEY_3:
-                fractalMesh.setColor(2);
+                for(int i = 0; i < meshRows; i++)
+                {
+                    for(int j = 0; j < meshCols; j++)
+                    {
+                        for(int k = 0; k < meshDepth; k++)
+                        {
+                            fractalMeshes[i][j][k].setColor(2);
+                        }
+                    }
+                }
+                //fractalMeshA.setColor(2);
                 // colorSelector = 2;
                 break;
             case GLFW_KEY_4:
-                fractalMesh.setColor(3);
+                for(int i = 0; i < meshRows; i++)
+                {
+                    for(int j = 0; j < meshCols; j++)
+                    {
+                        for(int k = 0; k < meshDepth; k++)
+                        {
+                            fractalMeshes[i][j][k].setColor(3);
+                        }
+                    }
+                }
+                //fractalMeshA.setColor(3);
                 // colorSelector = 3;
                 break;
             case GLFW_KEY_Q:        // Q toggles wireframe rendering
-                fractalMesh.toggleWireframe();
+                for(int i = 0; i < meshRows; i++)
+                {
+                    for(int j = 0; j < meshCols; j++)
+                    {
+                        for(int k = 0; k < meshDepth; k++)
+                        {
+                            fractalMeshes[i][j][k].toggleWireframe();
+                        }
+                    }
+                }
+                //fractalMeshA.toggleWireframe();
                 // renderWireframe = !renderWireframe;
                 break;
             case GLFW_KEY_E:        // E toggles faces rendering
-                fractalMesh.toggleFaces();
+                for(int i = 0; i < meshRows; i++)
+                {
+                    for(int j = 0; j < meshCols; j++)
+                    {
+                        for(int k = 0; k < meshDepth; k++)
+                        {
+                            fractalMeshes[i][j][k].toggleFaces();
+                        }
+                    }
+                }
+                //fractalMeshA.toggleFaces();
                 // renderFaces = !renderFaces;
                 break;
             default:
@@ -138,23 +223,35 @@ int main() {
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
     glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, GL_TRUE);
 
-    // Initialize fractalMesh object
-    fractalMesh.init(window, 
-        glm::translate(glm::mat4(), glm::vec3(0, 0, 0)), 
-        glm::scale(glm::vec3(10, 10, 10)), 
-        2);
+    // Initialize fractalMesh objects
+    int spacing = 1;
+    for(int i = 0; i < meshRows; i++)
+    {
+        for(int j = 0; j < meshCols; j++)
+        {
+            for(int k = 0; k < meshDepth; k++)
+            {
+                fractalMeshes[i][j][k].init(window, 
+                    glm::translate(glm::mat4(1), glm::vec3(spacing*i, spacing*j, spacing*k)), 
+                    glm::scale(glm::vec3(0.5, 0.5, 0.5)), 
+                    glm::rotate(0.0f, glm::vec3(0, 1, 0)),
+                    i%2+1, true);
+            }
+        }
+    }
+
 
     // Initialize camera object
     camera.init(
         window, cameraPosition, 
         glm::perspective(
             glm::radians<float>(55),
-            (float)windowWidth/(float)windowHeight,
+            (float)windowSizeX/(float)windowSizeY,
             0.0001f, 
             1000.0f
         ),
         horizontalAngle, verticalAngle,
-        cameraSpeed, mouseSensitivity
+        cameraSpeed*2, mouseSensitivity
     );
 
     // Set callback functions for user input
@@ -182,7 +279,16 @@ int main() {
             // Draw!
 
             camera.update();
-            fractalMesh.draw(camera.getViewMatrix(), camera.getProjectionMatrix());
+            for(int i = 0; i < meshRows; i++)
+            {
+                for(int j = 0; j < meshCols; j++)
+                {
+                    for(int k = 0; k < meshDepth; k++)
+                    {
+                        fractalMeshes[i][j][k].draw(camera.getViewMatrix(), camera.getProjectionMatrix());
+                    }
+                }
+            }
             glfwSwapBuffers(window);    // actually draw
         }
 
