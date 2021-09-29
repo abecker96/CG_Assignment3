@@ -19,6 +19,9 @@ FractalMesh fractalMeshA;
 FractalMesh fractalMeshes[meshRows][meshCols][meshDepth];
 Camera camera = Camera();
 
+bool translateMeshes = false;
+bool rotateMeshes = false;
+
 // https://stackoverflow.com/questions/5289613/generate-random-float-between-two-floats/5289624
 // Generates a random float between two values.
 // Does not care if the largest value is first or last
@@ -160,6 +163,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
                 //fractalMeshA.toggleFaces();
                 // renderFaces = !renderFaces;
                 break;
+            case GLFW_KEY_T:
+                translateMeshes = !translateMeshes;
+                break;
+            case GLFW_KEY_R:
+                rotateMeshes = !rotateMeshes;
+                break;
             default:
                 break;
         }
@@ -184,6 +193,12 @@ int main() {
     double start = glfwGetTime();
     double current = start;
     double deltaTime;
+
+    //Initialize variables for translation and rotation speed
+    glm::vec3 translation = glm::vec3(0.01, 0, 0);
+    glm::vec3 rotationAxis = glm::vec3(0, 1, 0);
+    float rotationSpeed = 0.1;
+    float currentRotation = 0;
 
     // Necessary due to glew bug
     glewExperimental = true;
@@ -232,10 +247,10 @@ int main() {
             for(int k = 0; k < meshDepth; k++)
             {
                 fractalMeshes[i][j][k].init(window, 
-                    glm::translate(glm::mat4(1), glm::vec3(spacing*i, spacing*j, spacing*k)), 
+                    glm::vec3(spacing*i, spacing*j, spacing*k), 
                     glm::scale(glm::vec3(0.5, 0.5, 0.5)), 
                     glm::rotate(0.0f, glm::vec3(0, 1, 0)),
-                    i%2+1, true);
+                    i%2+1, j%2);
             }
         }
     }
@@ -285,6 +300,24 @@ int main() {
                 {
                     for(int k = 0; k < meshDepth; k++)
                     {
+                        if(translateMeshes)
+                        {
+                            fractalMeshes[i][j][k].translate(translation);
+                        }
+                        else
+                        {
+                            fractalMeshes[i][j][k].resetPosition();
+                        }
+                        if(rotateMeshes)
+                        {
+                            currentRotation += rotationSpeed*deltaTime;
+                            fractalMeshes[i][j][k].rotateAroundOrigin(currentRotation, rotationAxis);
+                        }
+                        else
+                        {
+                            currentRotation = 0;
+                            fractalMeshes[i][j][k].rotateAroundOrigin(0, glm::vec3(0, 1, 0));
+                        }
                         fractalMeshes[i][j][k].draw(camera.getViewMatrix(), camera.getProjectionMatrix());
                     }
                 }

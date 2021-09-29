@@ -25,7 +25,7 @@
 class FractalMesh {
     public:
         FractalMesh(){}
-        void init(GLFWwindow* window, glm::mat4 translation, glm::mat4 scale, glm::mat4 rotation, int colorStyle, bool randomColors)
+        void init(GLFWwindow* window, glm::vec3 position, glm::mat4 scale, glm::mat4 rotation, int colorStyle, bool randomColors)
         {
             renderFaces = true;
             renderWireframe = true;
@@ -74,10 +74,12 @@ class FractalMesh {
             setColorData();
 
             // Set up modelMatrix as identity matrix for now
-            translationMatrix = translation;
+            defaultPosition = position;
+            resetPosition();
             scalingMatrix = scale;
             rotationMatrix = rotation;
-            objectToWorldMatrix = translationMatrix * rotationMatrix * scalingMatrix;
+            rotateOriginMatrix = glm::mat4(1);
+            objectToWorldMatrix = rotateOriginMatrix * translationMatrix * rotationMatrix * scalingMatrix;
         }
         // draw function
         // Draws every triangle in the vertexbuffer with a color corresponding to the colorbuffer
@@ -177,12 +179,33 @@ class FractalMesh {
         {
             renderFaces = !renderFaces;
         }
+        void setRotation(float angle, glm::vec3 axis)
+        {
+            rotationMatrix = glm::rotate(angle, axis);
+        }
+        void rotateAroundOrigin(float angle, glm::vec3 axis)
+        {
+            rotateOriginMatrix = glm::rotate(angle, axis);
+        }
+        void translate(glm::vec3 translation)
+        {
+            translationMatrix = glm::translate(translationMatrix, translation);
+        }
+        void setPosition(glm::vec3 position)
+        {
+            translationMatrix = glm::translate(glm::mat4(1), position);
+        }
+        void resetPosition()
+        {
+            setPosition(defaultPosition);
+        }
     private:
-        glm::mat4 objectToWorldMatrix, translationMatrix, scalingMatrix, rotationMatrix;
+        glm::mat4 objectToWorldMatrix, translationMatrix, scalingMatrix, rotationMatrix, rotateOriginMatrix;
         GLuint fractalShader, VertexArrayID;
         GLuint vertexbuffer, colorbuffer;
         GLint MVPMatrix_faces, MVPMatrix_wireframe, wireframeColorRef, timerRef, colorTypeRef;
         GLFWwindow* window;
+        glm::vec3 defaultPosition;
         glm::vec3 wireframeColor = glm::vec3(1.0, 1.0, 1.0);    //Color for the wireframe
         std::vector<Vector3> fractalVertVec;
         int seed, colorSelector, colorType;
@@ -210,7 +233,7 @@ class FractalMesh {
         };
         void updateObjectToWorld()
         {
-            objectToWorldMatrix = translationMatrix * rotationMatrix * scalingMatrix;
+            objectToWorldMatrix = rotateOriginMatrix * translationMatrix * rotationMatrix * scalingMatrix;
         }
         void renderAsWireframe(glm::mat4 MVP)
         {
