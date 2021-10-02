@@ -10,12 +10,11 @@
 #include "FractalMesh.h"
 #include "glCamera.h"
 
-const int sideLength = 2;
+const int sideLength = 1;
 // const int meshRows = 2;
 // const int meshCols = 2;
 // const int meshDepth = 2;
 
-FractalMesh fractalMeshA;
 FractalMesh fractalMeshes[sideLength][sideLength][sideLength];
 Camera camera = Camera();
 
