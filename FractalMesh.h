@@ -37,6 +37,7 @@ class FractalMesh {
 
             // Load and compile shaders
             fractalShader = LoadShaders("fractalShader.vrt.glsl", "fractalShader.frg.glsl");
+            glUseProgram(fractalShader);
 
             //initialize MVP transformation matrix
             MVPMatrix_faces = glGetUniformLocation(fractalShader, "MVP" );
@@ -80,18 +81,42 @@ class FractalMesh {
             rotationMatrix = rotation;
             rotateOriginMatrix = glm::mat4(1);
             objectToWorldMatrix = rotateOriginMatrix * translationMatrix * rotationMatrix * scalingMatrix;
+            glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+            // Activating attribute buffers and sending updated data to the GPU
+            // 1st attribute buffer : vertex positions
+            // glEnableVertexAttribArray(0);
+            // glVertexAttribPointer(
+            //     0,                  //matches layout in vertex shader
+            //     3,                  //3 vertices
+            //     GL_FLOAT,           //type
+            //     GL_FALSE,           //normalized?
+            //     0,                  //stride
+            //     (void*)0            //array buffer offset
+            // );
+
+            // glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+            // // 2nd attribute buffer : colors
+            // glEnableVertexAttribArray(1);
+            // glVertexAttribPointer(
+            //     1,                                // matches layout in fragment shader
+            //     3,                                // size
+            //     GL_FLOAT,                         // type
+            //     GL_FALSE,                         // normalized?
+            //     0,                                // stride
+            //     (void*)0                          // array buffer offset
+            // );
         }
         // draw function
         // Draws every triangle in the vertexbuffer with a color corresponding to the colorbuffer
         void draw(glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
         {
             // use shaders for the fractal
-            glUseProgram(fractalShader);
+            //glUseProgram(fractalShader);
 
+            glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
             // Activating attribute buffers and sending updated data to the GPU
             // 1st attribute buffer : vertex positions
             glEnableVertexAttribArray(0);
-            glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
             glVertexAttribPointer(
                 0,                  //matches layout in vertex shader
                 3,                  //3 vertices
@@ -101,9 +126,9 @@ class FractalMesh {
                 (void*)0            //array buffer offset
             );
 
+            glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
             // 2nd attribute buffer : colors
             glEnableVertexAttribArray(1);
-            glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
             glVertexAttribPointer(
                 1,                                // matches layout in fragment shader
                 3,                                // size
@@ -139,6 +164,9 @@ class FractalMesh {
             {
                 renderAsWireframe(MVP);
             }
+
+            glDisableVertexAttribArray(0);
+            glDisableVertexAttribArray(1);
         }
         void fractalize()
         {
@@ -241,7 +269,7 @@ class FractalMesh {
             glUniform1i(colorTypeRef, 0);
 
             glEnable(GL_POLYGON_OFFSET_LINE);
-            glPolygonOffset(0.01, -1);
+            glPolygonOffset(0.1, -1);
 
             // Actually draw wireframe
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -249,10 +277,7 @@ class FractalMesh {
 
             glDisable(GL_POLYGON_OFFSET_LINE);
 
-            glDisableVertexAttribArray(0);
-            glDisableVertexAttribArray(1);
         }
-
         void renderAsFaces(glm::mat4 MVP)
         {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

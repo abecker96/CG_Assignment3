@@ -10,13 +10,13 @@
 #include "FractalMesh.h"
 #include "glCamera.h"
 
-
-const int meshRows = 2;
-const int meshCols = 2;
-const int meshDepth = 2;
+const int sideLength = 2;
+// const int meshRows = 2;
+// const int meshCols = 2;
+// const int meshDepth = 2;
 
 FractalMesh fractalMeshA;
-FractalMesh fractalMeshes[meshRows][meshCols][meshDepth];
+FractalMesh fractalMeshes[sideLength][sideLength][sideLength];
 Camera camera = Camera();
 
 bool translateMeshes = false;
@@ -44,11 +44,11 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
-        for(int i = 0; i < meshRows; i++)
+        for(int i = 0; i < sideLength; i++)
         {
-            for(int j = 0; j < meshCols; j++)
+            for(int j = 0; j < sideLength; j++)
             {
-                for(int k = 0; k < meshDepth; k++)
+                for(int k = 0; k < sideLength; k++)
                 {
                     fractalMeshes[i][j][k].fractalize();
                 }
@@ -58,11 +58,11 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     }
     else if(button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
     {
-        for(int i = 0; i < meshRows; i++)
+        for(int i = 0; i < sideLength; i++)
         {
-            for(int j = 0; j < meshCols; j++)
+            for(int j = 0; j < sideLength; j++)
             {
-                for(int k = 0; k < meshDepth; k++)
+                for(int k = 0; k < sideLength; k++)
                 {
                     fractalMeshes[i][j][k].reset(i+j*10+k*100);
                 }
@@ -80,11 +80,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     {
         switch(key){
             case GLFW_KEY_1:        // 1-4 change colors
-                for(int i = 0; i < meshRows; i++)
+                for(int i = 0; i < sideLength; i++)
                 {
-                    for(int j = 0; j < meshCols; j++)
+                    for(int j = 0; j < sideLength; j++)
                     {
-                        for(int k = 0; k < meshDepth; k++)
+                        for(int k = 0; k < sideLength; k++)
                         {
                             fractalMeshes[i][j][k].setColor(0);
                         }
@@ -94,11 +94,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
                 // colorSelector = 0;
                 break;
             case GLFW_KEY_2:
-                for(int i = 0; i < meshRows; i++)
+                for(int i = 0; i < sideLength; i++)
                 {
-                    for(int j = 0; j < meshCols; j++)
+                    for(int j = 0; j < sideLength; j++)
                     {
-                        for(int k = 0; k < meshDepth; k++)
+                        for(int k = 0; k < sideLength; k++)
                         {
                             fractalMeshes[i][j][k].setColor(1);
                         }
@@ -108,11 +108,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
                 // colorSelector = 1;
                 break;
             case GLFW_KEY_3:
-                for(int i = 0; i < meshRows; i++)
+                for(int i = 0; i < sideLength; i++)
                 {
-                    for(int j = 0; j < meshCols; j++)
+                    for(int j = 0; j < sideLength; j++)
                     {
-                        for(int k = 0; k < meshDepth; k++)
+                        for(int k = 0; k < sideLength; k++)
                         {
                             fractalMeshes[i][j][k].setColor(2);
                         }
@@ -122,11 +122,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
                 // colorSelector = 2;
                 break;
             case GLFW_KEY_4:
-                for(int i = 0; i < meshRows; i++)
+                for(int i = 0; i < sideLength; i++)
                 {
-                    for(int j = 0; j < meshCols; j++)
+                    for(int j = 0; j < sideLength; j++)
                     {
-                        for(int k = 0; k < meshDepth; k++)
+                        for(int k = 0; k < sideLength; k++)
                         {
                             fractalMeshes[i][j][k].setColor(3);
                         }
@@ -136,11 +136,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
                 // colorSelector = 3;
                 break;
             case GLFW_KEY_Q:        // Q toggles wireframe rendering
-                for(int i = 0; i < meshRows; i++)
+                for(int i = 0; i < sideLength; i++)
                 {
-                    for(int j = 0; j < meshCols; j++)
+                    for(int j = 0; j < sideLength; j++)
                     {
-                        for(int k = 0; k < meshDepth; k++)
+                        for(int k = 0; k < sideLength; k++)
                         {
                             fractalMeshes[i][j][k].toggleWireframe();
                         }
@@ -150,11 +150,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
                 // renderWireframe = !renderWireframe;
                 break;
             case GLFW_KEY_E:        // E toggles faces rendering
-                for(int i = 0; i < meshRows; i++)
+                for(int i = 0; i < sideLength; i++)
                 {
-                    for(int j = 0; j < meshCols; j++)
+                    for(int j = 0; j < sideLength; j++)
                     {
-                        for(int k = 0; k < meshDepth; k++)
+                        for(int k = 0; k < sideLength; k++)
                         {
                             fractalMeshes[i][j][k].toggleFaces();
                         }
@@ -182,7 +182,7 @@ void glfwErrorCB(int error, const char* description) {
 int main() {
     int windowWidth, windowHeight, windowSizeX, windowSizeY;    //Screen space values
 
-    const float cameraSpeed = 0.3f;                 //Camera speed
+    const float cameraSpeed = 0.15f * sideLength;                 //Camera speed
     const float mouseSensitivity = 0.05f;           //Mouse sensitivity
     float horizontalAngle = 0.0f;                   //initial camera angle
     float verticalAngle = 0.0f;                     //initial camera angle
@@ -197,7 +197,7 @@ int main() {
     //Initialize variables for translation and rotation speed
     glm::vec3 translation = glm::vec3(0.01, 0, 0);
     glm::vec3 rotationAxis = glm::vec3(0, 1, 0);
-    float rotationSpeed = 0.1;
+    float rotationSpeed = 0.2/sideLength;
     float currentRotation = 0;
 
     // Necessary due to glew bug
@@ -240,11 +240,11 @@ int main() {
 
     // Initialize fractalMesh objects
     int spacing = 1;
-    for(int i = 0; i < meshRows; i++)
+    for(int i = 0; i < sideLength; i++)
     {
-        for(int j = 0; j < meshCols; j++)
+        for(int j = 0; j < sideLength; j++)
         {
-            for(int k = 0; k < meshDepth; k++)
+            for(int k = 0; k < sideLength; k++)
             {
                 fractalMeshes[i][j][k].init(window, 
                     glm::vec3(spacing*i, spacing*j, spacing*k), 
@@ -288,17 +288,17 @@ int main() {
         deltaTime = current-start;
         //if(deltaTime > 0.006944)
         {   
-            // std::cout << "New Frame in: " << deltaTime << std::endl;
+            std::cout << "New Frame in: " << deltaTime << std::endl;
             // Reset timer
             start = glfwGetTime();
             // Draw!
 
             camera.update();
-            for(int i = 0; i < meshRows; i++)
+            for(int i = 0; i < sideLength; i++)
             {
-                for(int j = 0; j < meshCols; j++)
+                for(int j = 0; j < sideLength; j++)
                 {
-                    for(int k = 0; k < meshDepth; k++)
+                    for(int k = 0; k < sideLength; k++)
                     {
                         if(translateMeshes)
                         {
