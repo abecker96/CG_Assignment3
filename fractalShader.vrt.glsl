@@ -15,6 +15,7 @@ out vec3 vPosition_out;
 
 void main() {
     //link vertexPos with gl_Position
+    //Generate MVP matrix
     mat4 MVP = matrices[5] * matrices[4] * matrices[3] * matrices[2] * matrices[1] * matrices[0];
     gl_Position = MVP * vec4(vPosition_Modelspace, 1.0);
 

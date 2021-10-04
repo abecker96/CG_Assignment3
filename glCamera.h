@@ -12,13 +12,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 
-
+// Camera class, basically just generates a viewmatrix
 class Camera {
     public:
         Camera()
         {}
         void init(GLFWwindow *cameraWindow, glm::vec3 pos, glm::mat4 perspective, float horizontalAngle, float verticalAngle, float speed, float sens)
         {
+            // Initialize basic data
             window = cameraWindow;
             glfwGetMonitorWorkarea(glfwGetPrimaryMonitor(), &windowWidth, &windowHeight, &windowSizeX, &windowSizeY);
             position = pos;
@@ -33,22 +34,24 @@ class Camera {
         }
         void update()
         {
+            // Figure out how long it's been since the last frame
             currentTime = glfwGetTime();
             deltaTime = currentTime - lastTime;
 
             // Get mouse position
             double mouseX, mouseY;
             glfwGetCursorPos(window, &mouseX, &mouseY);
+            // Need to reset cursor to a known location
             glfwSetCursorPos(window, windowSizeX/2, windowSizeY/2);
 
             // Calculate viewing angles based on mouse movement
             angleX += mouseSensitivity * (float)deltaTime * (windowSizeX/2 - (float)mouseX);
             angleY += mouseSensitivity * (float)deltaTime * (windowSizeY/2 - (float)mouseY);
 
-            updateCameraDirection();
-            updateCameraRight();
-            updateCameraUp();
-            updateViewMatrix();
+            updateCameraDirection();        // update direction vector
+            updateCameraRight();            // update vector facing to the right of the camera, to calculate the up vector
+            updateCameraUp();               // update the up vector
+            updateViewMatrix();             // calculate viewmatrix
 
             // Check keyboard input for camera movement
             int wKeyState = glfwGetKey(window, GLFW_KEY_W);
@@ -88,6 +91,7 @@ class Camera {
                 position -= up * (float)deltaTime * cameraSpeed;
             }
 
+            // timing data
             lastTime = currentTime;
         }
         glm::mat4 getProjectionMatrix()
@@ -111,7 +115,7 @@ class Camera {
             return viewMatrix;
         }
     private:
-        GLFWwindow *window;
+        GLFWwindow *window;                                         // Camera needs to know what window it's rendering in
         glm::mat4 viewMatrix, perspectiveMatrix;
         glm::vec3 position, direction, right, up;
         int windowWidth, windowHeight, windowSizeX, windowSizeY;
@@ -124,6 +128,7 @@ class Camera {
         }
         void updateCameraDirection()
         {
+            // necessary math
             direction = glm::vec3(
                 cos(angleY) * sin(angleX),
                 sin(angleY),
@@ -136,6 +141,7 @@ class Camera {
         }
         void updateCameraRight()
         {
+            // also necessary math
             right = glm::vec3(
                 sin(angleX - M_PI/2.0),
                 0,
@@ -152,6 +158,7 @@ class Camera {
         }
         void updateViewMatrix()
         {
+            // use glm's handy lookAt function to create viewMatrix
             viewMatrix = glm::lookAt(
                 position,
                 position+direction,
